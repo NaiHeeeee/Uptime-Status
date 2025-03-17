@@ -33,7 +33,7 @@
     <div class="flex flex-col items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
       <div class="flex items-center gap-6">
         <a 
-          :href="pkg.repository.url"
+          :href="`https://github.com/NaiHeeeee`"
           target="_blank"
           rel="noopener noreferrer"
           class="inline-flex items-center justify-center p-1.5 rounded-full transition-colors duration-200
@@ -67,7 +67,7 @@
       <div class="flex flex-col items-center gap-1">
         <div>
           <a 
-            :href="pkg.repository.url" 
+            :href="`https://github.com/JLinmr/Uptime-Status`" 
             target="_blank" 
             rel="noopener noreferrer"
             class="font-semibold hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
@@ -82,13 +82,13 @@
           >UptimeRobot</a> 接口 | 检测频率 5 分钟
         </div>
         <div>
-          Copyright © 2020 - {{ new Date().getFullYear() }} <a 
-            :href="pkg.repository.url"
+          Copyright © 2023 - {{ new Date().getFullYear() }} <a 
+            :href="pkg.url"
             target="_blank"
             rel="noopener noreferrer"
             class="font-semibold hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
           >
-            JLinmr
+            NaiHe
           </a>
         </div>
       </div>
