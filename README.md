@@ -33,6 +33,10 @@
   </a>
 </p>
 
+<div align="center">
+  简体中文|<a href="./README-en.md">English</a>
+</div>
+
 ## 📖 简介
 
 站点监测是一个基于 UptimeRobot API 开发的站点状态监控面板，支持多站点状态监控、实时通知、故障统计等功能。界面简洁美观，响应式设计，支持亮暗主题切换。
