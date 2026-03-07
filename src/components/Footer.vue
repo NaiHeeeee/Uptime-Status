@@ -82,13 +82,13 @@
           >{{ t('footer.uptimeRobot') }}</a> {{ t('footer.apiInterface') }} | {{ t('footer.checkFrequency') }}
         </div>
         <div>
-          {{ t('footer.copyright') }} © 2020 - {{ new Date().getFullYear() }} <a
+          {{ t('footer.copyright') }} © {{ pkg['start-year'] }} - {{ new Date().getFullYear() }} <a
             :href="pkg.url"
             target="_blank"
             rel="noopener noreferrer"
             class="font-semibold hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
           >
-            JLinmr
+            {{ pkg.author }}
           </a>
         </div>
       </div>
