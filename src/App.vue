@@ -1,22 +1,12 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 
+  <div class="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100
     dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-colors duration-300">
     <div class="flex-1 p-3 sm:p-8">
       <main class="max-w-7xl mx-auto space-y-8">
-        <Header
-          ref="headerRef"
-          :title="title"
-          :is-refreshing="isRefreshing"
-          :is-dark="isDark"
-          @refresh="refreshData"
-          @toggle-theme="toggleTheme"
-          @toggle-language="toggleLanguage"
-        />
+        <Header :title="title" :is-refreshing="isRefreshing" :is-dark="isDark" v-model:sort="sort"
+          @refresh="load" @toggle-theme="toggleTheme" @toggle-language="toggleLanguage" />
         <Stats :monitors="monitors" />
-        <Card 
-          :monitors="monitors"
-          :error="errorMessage"
-        />
+        <Card :monitors="monitors" :sort="sort" :error="error" :refreshing="isRefreshing" @update-monitor="onPatch" />
       </main>
     </div>
     <Footer />
@@ -26,76 +16,90 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { fetchMonitorData } from './utils/api'
+import { fetchMonitorData, writeCache, readCache, isRateLimit, waitRetry } from './utils/api'
 import Header from './components/Header.vue'
 import Stats from './components/Stats.vue'
 import Card from './components/Card.vue'
 import Footer from './components/Footer.vue'
 
 const { t, locale } = useI18n()
-
 const title = ref(import.meta.env.VITE_APP_TITLE || t('common.title'))
 const monitors = ref([])
 const isRefreshing = ref(false)
 const isDark = ref(false)
-const errorMessage = ref('')
+const error = ref('')
+const loadSort = () => {
+  const raw = localStorage.getItem('monitorSort')
+  if (!raw) return { key: 'friendlyName', order: 'asc' }
+  if (raw.includes(':')) {
+    const [key, order] = raw.split(':')
+    return { key: key || 'friendlyName', order: order === 'desc' ? 'desc' : 'asc' }
+  }
+  return { key: raw, order: raw === 'createDateTime' ? 'desc' : 'asc' }
+}
 
-// 监听语言变化，更新标题
-watch(locale, () => {
-  title.value = import.meta.env.VITE_APP_TITLE || t('common.title')
-})
+const sort = ref(loadSort())
 
-// 语言切换
+watch(sort, (v) => localStorage.setItem('monitorSort', `${v.key}:${v.order}`), { deep: true })
+watch(locale, () => { title.value = import.meta.env.VITE_APP_TITLE || t('common.title') })
+
 const toggleLanguage = () => {
   locale.value = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
   localStorage.setItem('locale', locale.value)
 }
 
-// 简化主题相关逻辑
 const initTheme = () => {
-  isDark.value = localStorage.getItem('theme') === 'dark' || 
-    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  updateTheme()
+  isDark.value = localStorage.getItem('theme') === 'dark' ||
+    (!localStorage.getItem('theme') && matchMedia('(prefers-color-scheme: dark)').matches)
+  document.documentElement.classList.toggle('dark', isDark.value)
 }
-
-const updateTheme = () => document.documentElement.classList.toggle('dark', isDark.value)
 
 const toggleTheme = () => {
   isDark.value = !isDark.value
   localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-  updateTheme()
+  document.documentElement.classList.toggle('dark', isDark.value)
 }
 
-// 简化刷新逻辑
-const refreshData = async () => {
+let loadId = 0
+
+const load = async (force = false) => {
   if (isRefreshing.value) return
-  
+  const id = ++loadId
   isRefreshing.value = true
-  monitors.value = []
-  errorMessage.value = ''
-  
-  const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error('Timeout')), 30000)
-  )
+  if (force) error.value = ''
+  let useForce = force
 
-  try {
-    monitors.value = await Promise.race([
-      fetchMonitorData(),
-      timeoutPromise
-    ])
-  } catch (error) {
-    console.error('获取监控数据失败:', error)
-    errorMessage.value = error.message === 'Timeout'
-      ? t('error.timeout')
-      : t('error.fetchFailed')
-  } finally {
-    isRefreshing.value = false
+  while (id === loadId) {
+    try {
+      monitors.value = await fetchMonitorData({ force: useForce })
+      error.value = ''
+      break
+    } catch (e) {
+      if (id !== loadId) break
+      const stale = readCache(true)
+      if (stale?.length) monitors.value = stale
+      if (!isRateLimit(e)) { error.value = t('error.fetchFailed'); break }
+      isRefreshing.value = false
+      await waitRetry(e.retryAfter || 60, (s) => {
+        if (id === loadId) {
+          error.value = monitors.value.length
+            ? t('error.rateLimitRetry', { seconds: s })
+            : t('error.rateLimit', { seconds: s })
+        }
+      })
+      if (id !== loadId) break
+      isRefreshing.value = true
+      useForce = true
+    }
   }
+  if (id === loadId) isRefreshing.value = false
 }
 
-// 生命周期钩子
-onMounted(() => {
-  initTheme()
-  refreshData()
-})
+const onPatch = (m) => {
+  const i = monitors.value.findIndex((x) => x.id === m.id)
+  if (i >= 0) { monitors.value[i] = m; writeCache(monitors.value) }
+}
+
+onMounted(() => { initTheme(); load() })
+onUnmounted(() => { loadId++ })
 </script>
