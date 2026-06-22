@@ -93,21 +93,21 @@
               ]"
               @click="openResponseTimeModal(monitor)"
             />
-            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">平均响应时间</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('card.avgResponseTime') }}</div>
             <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
               {{ formatters.responseTime(monitor.stats?.avgResponseTime) }}
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              最近24小时
+              {{ t('card.last24Hours') }}
             </div>
           </div>
           <div class="inner-card">
-            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">平均运行时间</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ t('card.avgUptime') }}</div>
             <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
               {{ formatters.uptime(monitor.stats?.uptime) }}
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              最近{{ getValidDays(monitor) }}天
+              {{ t('card.lastDays', { days: getValidDays(monitor) }) }}
             </div>
           </div>
         </div>
@@ -147,11 +147,11 @@
             />
           </div>
           <div class="flex justify-between text-xs text-gray-400 mt-2">
-            <span>30天前</span>
+            <span>{{ t('card.daysAgo') }}</span>
             <span class="text-gray-500">
               {{ getDowntimeStats(monitor) }}
             </span>
-            <span>今日</span>
+            <span>{{ t('card.today') }}</span>
           </div>
         </div>
 
@@ -166,7 +166,7 @@
               hover:bg-gray-100 dark:hover:bg-gray-700/50
               focus:outline-none"
           >
-            <span class="text-xs text-gray-500 dark:text-gray-400">故障记录</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ t('card.downtimeRecords') }}</span>
             <Icon 
               icon="bi:chevron-up"
               class="w-4 h-4 text-gray-400 transition-transform duration-200"
@@ -210,14 +210,14 @@
                       <span class="text-red-600/80 dark:text-red-400/80 text-xs">{{ formatters.dateTime(log.datetime) }}</span>
                     </div>
                     <div class="mt-1 text-red-600/80 dark:text-red-400/80 text-xs">
-                      持续时间: {{ formatters.duration(log.duration) }}
+                      {{ t('card.duration') }}: {{ formatters.duration(log.duration) }}
                     </div>
                   </div>
-                  <div v-else 
+                  <div v-else
                        key="empty"
                        class="text-center text-3xs text-gray-400"
                   >
-                    近期无故障记录
+                    {{ t('card.noRecentDowntime') }}
                   </div>
                 </TransitionGroup>
               </div>
@@ -268,7 +268,7 @@
         >
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
-              响应时间趋势
+              {{ t('card.responseTimeTrend') }}
             </h3>
             <button @click="closeModal"
                     class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full 
@@ -287,7 +287,7 @@
                 class="w-12 h-12 text-gray-400 dark:text-gray-500"
               />
               <div class="text-gray-500 dark:text-gray-400 text-sm">
-                暂无数据
+                {{ t('common.noData') }}
               </div>
             </div>
             <!-- 数据图表 -->
@@ -304,6 +304,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { format } from 'date-fns'
 import { Icon } from '@iconify/vue'
 import { Scatter, Line } from 'vue-chartjs'
@@ -318,11 +319,13 @@ import {
   Legend,
   TimeScale
 } from 'chart.js'
-import { 
+import {
   getStatusChartConfig,
-  getResponseTimeChartData, 
-  responseTimeChartOptions 
+  getResponseTimeChartData,
+  responseTimeChartOptions
 } from '@/utils/chartConfig'
+
+const { t } = useI18n()
 
 // 注册 Chart.js 组件
 ChartJS.register(
@@ -371,20 +374,20 @@ const STATUS = {
  * 状态配置映射
  */
 const STATUS_CONFIG = {
-  2: { 
-    text: '在线', color: 'green',
+  2: {
+    text: computed(() => t('status.online')), color: 'green',
     classes: 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400'
   },
   0: {
-    text: '暂停', color: 'yellow', 
+    text: computed(() => t('status.paused')), color: 'yellow',
     classes: 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
   },
   1: {
-    text: '准备中', color: 'yellow',
+    text: computed(() => t('status.preparing')), color: 'yellow',
     classes: 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
   },
   9: {
-    text: '离线', color: 'red',
+    text: computed(() => t('status.offline')), color: 'red',
     classes: 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
   }
 }
@@ -399,20 +402,20 @@ const formatters = {
   uptime: uptime => `${Number(uptime || 0).toFixed(2)}%`,
   /** 格式化持续时间 */
   duration: seconds => {
-    if (!seconds) return '0秒'
+    if (!seconds) return t('footer.seconds', { s: 0 })
     const h = Math.floor(seconds / 3600)
     const m = Math.floor((seconds % 3600) / 60)
     const s = seconds % 60
-    
+
     // 如果超过100小时，只显示小时
     if (h >= 100) {
-      return `约${h}小时`
+      return t('footer.duration', { hours: h })
     }
-    
+
     return [
-      h && `${h}小时`,
-      m && `${m}分钟`, 
-      (!h && !m && s) && `${s}秒`
+      h && t('footer.hours', { h }),
+      m && t('footer.minutes', { m }),
+      (!h && !m && s) && t('footer.seconds', { s })
     ].filter(Boolean).join('')
   },
   /** 格式化日期时间 */
@@ -457,39 +460,16 @@ const getStatusClasses = computed(() => (status) => {
 /**
  * 监控类型映射
  */
-const monitorTypeMap = {
-  1: 'HTTPS',
-  2: 'Keyword',
-  3: 'PING',
-  4: 'Port',
-  default: 'HTTP'
-}
-
-/**
- * 获取监控类型
- */
 const getMonitorType = computed(() => (monitor) => {
-  return monitorTypeMap[monitor.type] || monitorTypeMap.default
+  return t(`monitorType.${monitor.type}`, t('monitorType.default'))
 })
-
-/**
- * 错误消息映射
- */
-const ERROR_MESSAGES = {
-  333333: '连接超时',
-  444444: '无响应',
-  100001: 'DNS解析失败',
-  98: '离线状态',
-  99: '失联状态',
-  default: '连接异常'
-}
 
 /**
  * 获取错误消息
  */
 const getErrorMessage = computed(() => (code) => {
   const errorCode = typeof code === 'object' ? code.code : code
-  return ERROR_MESSAGES[errorCode] || ERROR_MESSAGES.default
+  return t(`errorMessages.${errorCode}`, t('errorMessages.default'))
 })
 
 /**
@@ -501,15 +481,19 @@ const getDowntimeStats = computed(() => (monitor) => {
   const totalDowntime = formatters.duration(monitor.stats?.totalDowntime)
   const validDays = getValidDays(monitor)
 
-  if (validDays <= 0) return '暂无数据'
-  
+  if (validDays <= 0) return t('common.noData')
+
   if (downtimeCount > 0 || monitor.status === STATUS.OFFLINE) {
     if (downtimeCount > 0) {
-      return `最近${validDays}天 ${downtimeCount} 次故障，总计${totalDowntime}`
+      return t('card.downtimeInfo', {
+        days: validDays,
+        count: downtimeCount,
+        duration: totalDowntime
+      })
     }
-    return '当前离线'
+    return t('card.currentOffline')
   }
-  return `最近${validDays}天运行正常`
+  return t('card.noDowntime')
 })
 
 /**

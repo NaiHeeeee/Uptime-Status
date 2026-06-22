@@ -27,7 +27,7 @@
           :class="isRefreshing ? 'animate-spin' : ''"
         />
         <span class="hidden sm:block text-sm font-medium">
-          {{ `${formatTime(countdown)}后刷新` }}
+          {{ t('common.refreshIn') }} {{ formatTime(countdown) }}
         </span>
       </button>
       <button
@@ -40,17 +40,28 @@
           group overflow-hidden"
       >
         <div class="relative h-5 w-5">
-          <Icon 
-            icon="bi:sun" 
+          <Icon
+            icon="bi:sun"
             class="w-5 h-5 absolute transition-all duration-500 transform"
             :class="isDark ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'"
           />
-          <Icon 
+          <Icon
             icon="bi:moon"
             class="w-5 h-5 absolute transition-all duration-500 transform"
             :class="isDark ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'"
           />
         </div>
+      </button>
+      <button
+        @click="toggleLanguage"
+        class="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200
+          bg-white dark:bg-gray-800
+          text-gray-600 dark:text-gray-300
+          shadow-sm shadow-gray-200/50 dark:shadow-gray-900/30
+          hover:bg-gray-50 dark:hover:bg-gray-700
+          group"
+      >
+        <span class="text-xs font-bold">{{ locale === 'zh-CN' ? 'EN' : '中' }}</span>
       </button>
     </div>
   </div>
@@ -58,7 +69,10 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
+
+const { t, locale } = useI18n()
 
 const formatTime = (seconds) => {
   const minutes = Math.floor(seconds / 60)
@@ -81,7 +95,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['refresh', 'toggle-theme'])
+const emit = defineEmits(['refresh', 'toggle-theme', 'toggle-language'])
 
 /**
  * 刷新间隔
@@ -117,6 +131,13 @@ const refreshData = () => (emit('refresh'), countdown.value = REFRESH_INTERVAL)
  */
 const toggleTheme = () => {
   emit('toggle-theme')
+}
+
+/**
+ * 切换语言
+ */
+const toggleLanguage = () => {
+  emit('toggle-language')
 }
 
 onMounted(() => {

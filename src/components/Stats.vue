@@ -33,7 +33,10 @@
 
 <script setup>
 import { computed, ref, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
+
+const { t } = useI18n()
 
 const props = defineProps({
   monitors: {
@@ -95,34 +98,34 @@ const animateValue = (start, end, duration, index) => {
  */
 const overviewItems = computed(() => [
   {
-    label: '监控网站',
+    label: t('stats.totalWebsites'),
     value: total.value,
-    desc: '全部网站',
+    desc: t('stats.allWebsites'),
     icon: 'bi:check-circle',
     iconColor: 'text-emerald-500',
     containerClass: 'after:border-emerald-500/50 dark:after:border-emerald-400/50'
   },
   {
-    label: '正常网站',
+    label: t('stats.normalWebsites'),
     value: normal.value,
-    desc: '访问正常',
+    desc: t('stats.accessNormal'),
     icon: 'bi:check-circle-fill',
     iconColor: 'text-green-500',
     containerClass: 'after:border-green-500/50 dark:after:border-green-400/50'
   },
   {
-    label: '异常网站',
+    label: t('stats.abnormalWebsites'),
     value: abnormal.value,
-    desc: '访问异常',
+    desc: t('stats.accessAbnormal'),
     icon: 'bi:x-circle-fill',
     iconColor: 'text-red-500',
     containerClass: 'after:border-red-500/50 dark:after:border-red-400/50'
   },
   {
-    label: '平均响应',
+    label: t('stats.avgResponse'),
     value: avgResponse.value,
-    unit: 'ms',
-    desc: '网络延迟',
+    unit: t('stats.unit'),
+    desc: t('stats.networkLatency'),
     icon: 'bi:clock',
     iconColor: 'text-blue-500',
     containerClass: 'after:border-blue-500/50 dark:after:border-blue-400/50'
