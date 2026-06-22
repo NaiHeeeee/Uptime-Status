@@ -10,11 +10,12 @@
         <div class="text-red-600 dark:text-red-400 font-medium text-center">{{ error }}</div>
       </div>
     </div>
-    <div v-if="!loading" class="grid gap-6 grid-cols-1 md:grid-cols-2">
-    <!-- 单个监控卡片 -->
-    <div v-for="monitor in sortedMonitors" 
-         :key="monitor.id"
-         class="card-base animated-border p-6 rounded-2xl backdrop-blur-sm animate-fade"
+    <TransitionGroup v-if="!loading" tag="div"
+      class="flex flex-wrap gap-6"
+      move-class="sort-move">
+    <div v-for="monitor in sortedMonitors" :key="monitor.id"
+      class="sort-item w-full md:w-[calc(50%-0.75rem)]">
+    <div class="card-base animated-border p-6 rounded-2xl backdrop-blur-sm animate-fade"
          :class="cardBorderClass(monitor.status)"
          @mouseenter="$event.target.classList.add('hovered')"
     >
@@ -201,6 +202,7 @@
       </div>
     </div>
     </div>
+    </TransitionGroup>
   </template>
 
   <!-- 响应时间详情模态框 -->
@@ -305,7 +307,7 @@ const loading = computed(() => !props.monitors?.length || props.refreshing)
 
 const STATUS_LABEL = { UP: 'status.online', PAUSED: 'status.paused', STARTED: 'status.preparing', DOWN: 'status.offline', LOOKS_DOWN: 'status.offline' }
 
-const sortedMonitors = computed(() => sortMonitors(props.monitors || [], props.sort, locale.value))
+const sortedMonitors = computed(() => sortMonitors(props.monitors || [], props.sort))
 
 const statusTone = (s) => isMonitorOffline(s) ? 'red' : isMonitorWarning(s) ? 'yellow' : 'green'
 const getStatusLabel = (s) => t(STATUS_LABEL[normalizeStatus(s)] || 'status.preparing')
