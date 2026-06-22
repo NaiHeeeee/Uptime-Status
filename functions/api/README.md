@@ -1,37 +1,47 @@
 # API 目录说明
 
-本目录 (`functions/api/`) 包含了 腾讯云 EdgeOne Pages 和 Cloudflare Pages 的 API 代理实现。
+本目录 (`functions/api/`) 包含 **腾讯云 EdgeOne Pages** 和 **Cloudflare Pages** 的 API 代理实现，对接 UptimeRobot **v3 API**。
 
 ## 文件说明
 
 ### status.js
 
-这是一个运行在边缘节点上的代理函数，主要用于：
-- 转发请求到 UptimeRobot API
+运行在边缘节点上的代理函数，主要功能：
+
+- 转发请求到 `https://api.uptimerobot.com/v3`
 - 处理 CORS（跨域）请求
-- 处理错误响应
+- 服务端缓存（5 分钟）与 429 限流响应
+
+逻辑与 `api/status.js`（Vercel 版）共用同一套实现。
+
+## 接口说明
+
+| 路由 | 说明 |
+|------|------|
+| `GET /api/status` | 获取监控列表及近 30 天事件 |
+| `GET /api/status?refresh=1` | 强制刷新，跳过服务端缓存 |
+| `GET /api/status?monitorId=xxx` | 获取指定监控的响应时间统计 |
 
 ## 请求处理
 
-1. OPTIONS 请求：返回 CORS 头部
-2. POST 请求：转发到 UptimeRobot API
-3. 错误处理：返回统一的错误响应
+1. **OPTIONS**：返回 CORS 头部
+2. **GET / POST**：转发到 UptimeRobot v3（Bearer Token 认证）
+3. **429**：返回 `{ error, retryAfter }`
 
-## 环境变量配置
-
-在项目根目录的 `.env` 文件中配置：
+## 环境变量
 
 ```bash
-# API 代理地址
-VITE_UPTIMEROBOT_API_URL = "/api/status"  # 使用默认配置
+VITE_UPTIMEROBOT_API_KEY = "你的 Read-Only API Key"
+VITE_UPTIMEROBOT_API_URL = "/api/status"
+
+# 以下任选其一，供边缘函数使用
+UPTIMEROBOT_API_KEY = "你的 Read-Only API Key"
 ```
 
 ## 部署说明
 
-- 支持多个平台部署:
-  - 腾讯云 EdgeOne Pages
-  - Cloudflare Pages
+- 支持 **腾讯云 EdgeOne Pages**、**Cloudflare Pages**
 - 路由 `/api/status` 由平台自动处理
-- 不需要额外的路径检查或路由配置
+- 无需额外路由配置
 
-请确保在部署前正确配置环境变量，以保证 API 请求能够正常工作。 
+> 旧版 v2 接口（`.../v2/getMonitors`）已停用，请勿再使用。

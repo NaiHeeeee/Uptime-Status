@@ -39,7 +39,9 @@
 
 ## 📖 Introduction
 
-Website Monitor is a website status monitoring dashboard developed based on the UptimeRobot API, supporting multi-website status monitoring, real-time notifications, outage statistics and other functions. It features a clean and beautiful interface, responsive design, and supports light/dark theme switching.
+Website Monitor is a website status monitoring dashboard developed based on the UptimeRobot **v3 API**, supporting multi-website status monitoring, outage statistics and other functions. It features a clean and beautiful interface, responsive design, and supports light/dark theme switching.
+
+> **Upgrade notice**: UptimeRobot has deprecated the legacy v2 endpoint (`.../v2/getMonitors`). If you are still on an older version, please pull the latest code and redeploy, otherwise data loading may fail or time out.
 
 ## ✨ Feature Preview
 
@@ -50,10 +52,23 @@ Website Monitor is a website status monitoring dashboard developed based on the 
 - 📊 Real-time Monitoring: Supports multiple monitoring methods
 - 📱 Responsive Design: Adapts to mobile and desktop devices
 - 🌓 Theme Switching: Supports light/dark mode
-- 📈 Data Statistics: Visual display of uptime and response time
+- 📈 Data Statistics: Visual display of uptime and response time (loaded on click)
 - 🔔 Outage Records: Detailed downtime records and cause analysis
-- 🔄 Auto-refresh: Automatically updates monitoring data at regular intervals
+- 🔄 Auto-refresh: Automatically updates monitoring data (5-minute cache)
+- 🔃 Sorting: Sort by name, time, or status with ascending/descending order
 - 💫 Smooth Animations: Fluid UI interaction experience
+
+### UptimeRobot API Changes
+
+UptimeRobot has fully migrated to the **v3 REST API**. The legacy v2 endpoint is no longer available:
+
+| Item | v2 (deprecated) | v3 (current) |
+|------|-----------------|--------------|
+| URL | `https://api.uptimerobot.com/v2/getMonitors` | `https://api.uptimerobot.com/v3` |
+| Auth | POST form + `api_key` | `Authorization: Bearer <key>` |
+| Data | Single response | Paginated REST (monitors, incidents, etc.) |
+
+This project connects to v3 through the `/api/status` server-side proxy. You do **not** need to call UptimeRobot directly from the frontend when deployed.
 
 ## ⚙️ Deployment & Configuration
 
@@ -93,7 +108,7 @@ This project supports the following three deployment methods, all of which can a
    - Use the default configuration `VITE_UPTIMEROBOT_API_URL = "/api/status"`
 
 4. **Other Platforms**
-   - Build your own API proxy
+   - Build your own API proxy targeting `https://api.uptimerobot.com/v3`
    - Set `VITE_UPTIMEROBOT_API_URL` to your proxy address in the `.env` file
 
 ### Quick Start
@@ -115,30 +130,27 @@ npm install
 
 Modify the following settings in the `.env` file:
 ```bash
-# UptimeRobot API Key
-VITE_UPTIMEROBOT_API_KEY = "ur2290572-af4663a4e3f83be26119abbe"
+# UptimeRobot API Key (Read-Only is sufficient)
+VITE_UPTIMEROBOT_API_KEY = "your API key"
 
-# UptimeRobot API URL 
-# Except for Tencent Cloud EdgeOne Pages, Vercel, and Cloudflare Pages
-## Other deployment methods require building a custom API proxy
-## Proxy address: https://api.uptimerobot.com/v2/getMonitors
+# UptimeRobot API URL
+# When deploying to Vercel / Cloudflare Pages / EdgeOne:
 VITE_UPTIMEROBOT_API_URL = "/api/status"
+
+# For local development with direct v3 access:
+# VITE_UPTIMEROBOT_API_URL = "https://api.uptimerobot.com/v3"
 
 # Website Title
 VITE_APP_TITLE = "Website Monitor"
-
-# Monitoring dashboard sorting method
-# Supports friendly_name and create_datetime
-VITE_UPTIMEROBOT_STATUS_SORT = "friendly_name"
 ```
+
+> `VITE_UPTIMEROBOT_STATUS_SORT` has been removed. Use the sort control in the page header; your preference is saved in the browser.
 
 4. Development & Debugging
 ```bash
 pnpm dev
 # or
 npm run dev
-
-# Set VITE_UPTIMEROBOT_API_URL to "https://api.uptimerobot.com/v2/getMonitors" for development
 ```
 
 5. Build & Deploy
