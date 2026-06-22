@@ -10,9 +10,9 @@ export const isMonitorAbnormal = (s) => isMonitorOffline(s) || isMonitorPaused(s
 
 const rank = (s) => ({ UP: 0, STARTED: 1, PAUSED: 2, LOOKS_DOWN: 3, DOWN: 4 }[normalizeStatus(s)] ?? 5)
 
-const cmp = (a, b, locale) => (a.friendlyName || '').localeCompare(b.friendlyName || '', locale)
+const cmp = (a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true })
 
-export const sortMonitors = (list, { key = 'friendlyName', order = 'asc' } = {}, locale = 'zh-CN') => {
+export const sortMonitors = (list, { key = 'friendlyName', order = 'asc' } = {}) => {
   const dir = order === 'desc' ? -1 : 1
   const get = {
     friendlyName: (m) => m.friendlyName || '',
@@ -22,8 +22,10 @@ export const sortMonitors = (list, { key = 'friendlyName', order = 'asc' } = {},
 
   return [...list].sort((a, b) => {
     const va = get(a), vb = get(b)
-    const d = typeof va === 'string' ? va.localeCompare(vb, locale) : va - vb
-    return d * dir || cmp(a, b, locale) * dir
+    const d = typeof va === 'string'
+      ? va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' })
+      : va - vb
+    return d * dir || cmp(a, b) * dir
   })
 }
 
