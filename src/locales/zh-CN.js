@@ -16,13 +16,13 @@ export default {
     accessNormal: '访问正常',
     abnormalWebsites: '异常网站',
     accessAbnormal: '访问异常',
-    avgResponse: '平均响应',
-    networkLatency: '网络延迟',
-    unit: 'ms'
+    avgUptime: '平均可用率',
+    last30Days: '最近30天'
   },
   card: {
     avgResponseTime: '平均响应时间',
     last24Hours: '最近24小时',
+    clickToLoad: '点击查看趋势',
     avgUptime: '平均运行时间',
     lastDays: '最近{days}天',
     downtimeRecords: '故障记录',
@@ -42,8 +42,17 @@ export default {
     offline: '离线'
   },
   error: {
-    timeout: '请求超时，请检查网络连接后重试',
-    fetchFailed: '获取监控数据失败，请稍后重试'
+    fetchFailed: '获取监控数据失败，请稍后重试',
+    rateLimit: 'API 限流，{seconds} 秒后重试…',
+    rateLimitRetry: '限流中，已显示缓存，{seconds} 秒后重新获取',
+    rateLimitWait: 'API 限流，请 {seconds} 秒后再试'
+  },
+  sort: {
+    friendlyName: '名称',
+    createDateTime: '时间',
+    status: '状态',
+    asc: '升序',
+    desc: '降序'
   },
   errorMessages: {
     333333: '连接超时',
@@ -66,10 +75,12 @@ export default {
     seconds: '{s}秒'
   },
   monitorType: {
-    1: 'HTTPS',
-    2: 'Keyword',
-    3: 'PING',
-    4: 'Port',
-    default: 'HTTP'
+    HTTP: 'HTTP',
+    HTTPS: 'HTTPS',
+    KEYWORD: 'Keyword',
+    PING: 'PING',
+    PORT: 'Port',
+    HEARTBEAT: 'Heartbeat',
+    default: 'Monitor'
   }
 }

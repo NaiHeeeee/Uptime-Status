@@ -16,13 +16,13 @@ export default {
     accessNormal: 'Access Normal',
     abnormalWebsites: 'Abnormal Websites',
     accessAbnormal: 'Access Abnormal',
-    avgResponse: 'Avg Response',
-    networkLatency: 'Network Latency',
-    unit: 'ms'
+    avgUptime: 'Avg Uptime',
+    last30Days: 'Last 30 Days'
   },
   card: {
     avgResponseTime: 'Avg Response Time',
     last24Hours: 'Last 24 Hours',
+    clickToLoad: 'Click for trend',
     avgUptime: 'Avg Uptime',
     lastDays: 'Last {days} Days',
     downtimeRecords: 'Downtime Records',
@@ -42,8 +42,17 @@ export default {
     offline: 'Offline'
   },
   error: {
-    timeout: 'Request timeout, please check your network connection and try again',
-    fetchFailed: 'Failed to fetch monitoring data, please try again later'
+    fetchFailed: 'Failed to fetch monitoring data, please try again later',
+    rateLimit: 'Rate limited, retrying in {seconds}s…',
+    rateLimitRetry: 'Rate limited, showing cache, retrying in {seconds}s…',
+    rateLimitWait: 'Rate limited, please try again in {seconds}s'
+  },
+  sort: {
+    friendlyName: 'Name',
+    createDateTime: 'Time',
+    status: 'Status',
+    asc: 'Ascending',
+    desc: 'Descending'
   },
   errorMessages: {
     333333: 'Connection Timeout',
@@ -66,10 +75,12 @@ export default {
     seconds: '{s}s'
   },
   monitorType: {
-    1: 'HTTPS',
-    2: 'Keyword',
-    3: 'PING',
-    4: 'Port',
-    default: 'HTTP'
+    HTTP: 'HTTP',
+    HTTPS: 'HTTPS',
+    KEYWORD: 'Keyword',
+    PING: 'PING',
+    PORT: 'Port',
+    HEARTBEAT: 'Heartbeat',
+    default: 'Monitor'
   }
 }
